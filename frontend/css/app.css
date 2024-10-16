@@ -1,0 +1,15 @@
+header{
+    font-size: 200%;
+    text-align: center;
+    line-height: 250%;
+}
+
+footer{
+    font-size: 80%;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+h3{
+    color: red;
+}
