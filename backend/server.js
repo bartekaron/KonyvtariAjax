@@ -15,9 +15,90 @@ var pool  = mysql.createPool({
   database : process.env.DBNAME
 });
 
-app.listen(port, ()=>{
-    console.log(`Server listening on port ${port}...`);
+
+app.get('/books', (req, res) => {
+    pool.query(`SELECT * FROM books`, (err, results) => {
+        if(err){
+            res.status(500).send("Hiba történt az adatbázishoz való csatlakozás során!");
+            return;
+        }
+        res.status(200).send(results);
+        return; 
+    })
 });
+
+app.post('/books', (req, res) => {
+    if(!req.body.title) {
+        res.status(400).send("A könyv címe kötelező!");
+        return;
+    }
+    pool.query(`INSERT INTO books VALUES(' ','${req.body.title}', '${req.body.releaseDate}', '${req.body.ISBN}')`, (err, results) => {
+        if(err){
+            res.status(500).send("Hiba történt az adatbázishoz való csatlakozás során!");
+            return;
+        }
+        res.status(202).send("Sikeres regisztráció!")
+        return;
+    });
+});
+
+app.patch('/books/:id', (req, res) => {
+    if(!req.params.id){
+        res.status(203).send("Hiányzó azonosító!");
+        return;
+    }
+    if(!req.body.title || !req.body.ISBN){
+        res.status(203).send('Hiányzó adatok!');
+        return;
+    }
+    pool.query(`UPDATE books SET title='${req.body.title}', releaseDate='${req.body.releaseDate}', ISBN='${req.body.ISBN}'`, (err, results) => {
+        if(err){
+            res.status(500).send('Hiba történt az adatbázis elérése közben!');
+            return;
+        }
+        if(results.affectedRows == 0){
+            res.status(203).send('Hibás azonosító!');
+            return;
+        }
+
+        res.status(200).send('Sikeres módosítás!');
+        return;
+    });
+});
+
+app.delete('/books/:id', (req, res) => {
+
+    if(!req.params.id){
+        res.status(203).send('Hiányzó azonosító!');
+        return;
+    }
+
+    pool.query(`DELETE FROM books WHERE ID='${req.params.id}'`, (err, results) => {
+
+        if(err){
+            res.status(500).send('Hiba történt az adatbázis lekérése közben!');
+            return;
+        }
+
+        if(results.affectedRows == 0){
+            res.status(203).send('Hibás az azonosító!');
+            return;
+        }
+
+        res.status(200).send('Felhasználó törölve!');
+        return;
+
+    });
+
+});
+
+/*
+GET /books - Listázza az összes könyvet.
+POST /books - Új könyv hozzáadása.
+PUT /books/{id} - Meglévő könyv módosítása.
+DELETE /books/{id} - Könyv törlése.
+*/
+
 //A szerzőkhez tartozó végpontok:
 
 //GET /authors - Listázza az összes szerzőt.
@@ -96,3 +177,9 @@ app.patch('/authors/:id', (req,res)=>{
   return
   })
 })
+
+
+
+app.listen(port, ()=>{
+    console.log(`Server listening on port ${port}...`);
+});
