@@ -44,8 +44,12 @@ function onBookLoad() {
                 updateButton.classList.add('btn', 'btn-secondary');
                 updateButton.onclick = (event) => {
                     event.stopPropagation(); 
+                    // Store the book data in local storage
+                    localStorage.setItem('selectedBook', JSON.stringify(item));
+                    // Redirect to updateBook.html
                     render('updateBook');
                 };
+                
 
                 let tdUpdate = document.createElement('td');
                 tdUpdate.appendChild(updateButton);
@@ -69,6 +73,28 @@ function onBookLoad() {
 
 
 onBookLoad();
+
+function loadBook(id) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', `http://localhost:5000/books/${id}`, true);
+    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    xhr.send();
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            var book = JSON.parse(xhr.responseText);
+            document.querySelector('#title').value = book.title;
+            document.querySelector('#releaseDate').value = book.releaseDate;
+            document.querySelector('#isbn').value = book.ISBN;
+
+            // Populate the author dropdown and select the current author
+            authorToltes(); // Function to load authors
+            document.querySelector('#authorSelect').value = book.authorId; // Select the current author
+        }
+    };
+}
+
+
 /*
 function konyvFeltoltes(event) {
     event.preventDefault(); // Megakadályozzuk az alapértelmezett űrlap küldést
@@ -147,36 +173,32 @@ function deleteRow(item) {
 }
 
 function updateKonyv(kivalasztott) {
-       
-        var data = JSON.stringify({
-            title: document.querySelector('title'),
-            releaseDate: document.querySelector('releaseDate'),
-            ISBN: document.querySelector('isbn')
+    var data = JSON.stringify({
+        title: document.querySelector('#title').value,          // Get input values
+        releaseDate: document.querySelector('#releaseDate').value,
+        ISBN: document.querySelector('#isbn').value,
+        authorId: document.querySelector('#authorSelect').value // Get selected author ID
+    });
 
-        });
+    var xhrUpdate = new XMLHttpRequest();
+    xhrUpdate.open('PATCH', `http://localhost:5000/books/${kivalasztott.book_id}`, true);
+    xhrUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
-        
-        var xhrUpdate = new XMLHttpRequest();
-        xhrUpdate.open('PATCH', `http://localhost:5000/books/${kivalasztott.book_id}`, true);
-        xhrUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-
-        xhrUpdate.onreadystatechange = function() {
-            if (xhrUpdate.readyState === 4) {
-                if (xhrUpdate.status === 200) {
-                    alert('Frissítés sikeres!'); 
-                    
-                   
-                    
-                } else {
-                    alert('Hiba történt: ' + xhrUpdate.responseText); 
-                }
+    xhrUpdate.onreadystatechange = function() {
+        if (xhrUpdate.readyState === 4) {
+            if (xhrUpdate.status === 200) {
+                alert('Frissítés sikeres!');
+                onBookLoad(); // Refresh book list
+            } else {
+                alert('Hiba történt: ' + xhrUpdate.responseText);
             }
-        };
+        }
+    };
 
-        xhrUpdate.send(data);
-        onBookLoad();
-    
+    xhrUpdate.send(data);
 }
+
+
 
 function authorToltes() {
     var xhrAuthor = new XMLHttpRequest();
@@ -207,3 +229,50 @@ function authorToltes() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Get the selectedBook from local storage
+    const selectedBook = JSON.parse(localStorage.getItem('selectedBook'));
+
+    // Check if there is a selectedBook
+    if (selectedBook) {
+        document.querySelector('#title').value = selectedBook.title;
+        document.querySelector('#releaseDate').value = selectedBook.releaseDate;
+        document.querySelector('#isbn').value = selectedBook.ISBN;
+
+        // Populate the author select options
+        // You might want to fetch authors here and select the one associated with the book
+        fetchAuthorsAndSelect(selectedBook.authorId);
+    }
+});
+
+function fetchAuthorsAndSelect(selectedAuthorId) {
+    var xhrAuthor = new XMLHttpRequest();
+    xhrAuthor.open('GET', 'http://localhost:5000/authors', true);
+    xhrAuthor.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    xhrAuthor.send();
+
+    xhrAuthor.onreadystatechange = function() {
+        if (xhrAuthor.readyState === 4 && xhrAuthor.status === 200) {
+            var authorData = JSON.parse(xhrAuthor.responseText);
+            var authorSelect = document.querySelector('#authorSelect');
+
+            // Clear existing options
+            authorSelect.innerHTML = '';
+
+            authorData.forEach((item) => {
+                let option = document.createElement('option');
+                option.value = item.id;
+                option.text = item.name;
+
+                // Check if this author is the selected one
+                if (item.id == selectedAuthorId) {
+                    option.selected = true; // Mark as selected
+                }
+
+                authorSelect.appendChild(option);
+            });
+        }
+    };
+}
+

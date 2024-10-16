@@ -77,28 +77,52 @@ app.post('/books', (req, res) => {
 
 
 app.patch('/books/:id', (req, res) => {
-    if(!req.params.id){
+    if (!req.params.id) {
         res.status(203).send("Hiányzó azonosító!");
         return;
     }
-    if(!req.body.title || !req.body.ISBN){
+
+    const { title, releaseDate, ISBN, authorId } = req.body;
+
+    if (!title || !ISBN) {
         res.status(203).send('Hiányzó adatok!');
         return;
     }
-    pool.query(`UPDATE books SET title='${req.body.title}', releaseDate='${req.body.releaseDate}', ISBN='${req.body.ISBN}'`, (err, results) => {
-        if(err){
+
+    // Update book details
+    pool.query(`UPDATE books SET title=?, releaseDate=?, ISBN=? WHERE id=?`, 
+    [title, releaseDate, ISBN, req.params.id], (err, results) => {
+        if (err) {
             res.status(500).send('Hiba történt az adatbázis elérése közben!');
             return;
         }
-        if(results.affectedRows == 0){
+
+        if (results.affectedRows == 0) {
             res.status(203).send('Hibás azonosító!');
             return;
+        }
+
+        // Update the book_authors table
+        if (authorId) {
+            pool.query(`DELETE FROM book_authors WHERE bookID=?`, [req.params.id], (err) => {
+                if (err) {
+                    return res.status(500).send("Hiba történt a szerző törlésekor!");
+                }
+
+                pool.query(`INSERT INTO book_authors (bookID, authorID) VALUES (?, ?)`, 
+                [req.params.id, authorId], (err) => {
+                    if (err) {
+                        return res.status(500).send("Hiba történt a szerző hozzárendelésekor!");
+                    }
+                });
+            });
         }
 
         res.status(200).send('Sikeres módosítás!');
         return;
     });
 });
+
 
 app.delete('/books/:id', (req, res) => {
 
@@ -198,29 +222,23 @@ app.delete('/authors/:id', (req, res) =>{
 })
 
 //PUT /authors/{id} - Meglévő szerző módosítása.
-app.patch('/authors/:id', (req,res)=>{
-  console.log(req.body);
-  if(!req.params.id){
-      res.status(203).send('Hiányzó azonosító!');
-      return;
-  }
-  if(!req.body.name || !req.body.birthdate){
-      res.status(203).send('Hiányzó adatok!');
-      return;
-  }
-  pool.query(`UPDATE authors SET name='${req.body.name}', birthdate='${req.body.birthdate}' WHERE id='${req.params.id}'`, (err,results)=>{
-    if(err){
-      res.status(500).send('Hiba történt az adatbázis elérése közben!');
-      return;
-  }
-  if(results.affectedRows == 0){
-      res.status(203).send('Hibás azonosító!');
-      return;
-  }
-  res.status(200).send('Sikeres módosítás!');
-  return
-  })
-})
+app.patch('/authors/:id', (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).send('Hiányzó azonosító!');
+    }
+    if (!req.body.name || !req.body.birthdate) {
+        return res.status(400).send('Hiányzó adatok!');
+    }
+    pool.query(`UPDATE authors SET name=?, birthdate=? WHERE id=?`, [req.body.name, req.body.birthdate, req.params.id], (err, results) => {
+        if (err) {
+            return res.status(500).send('Hiba történt az adatbázis elérése közben!');
+        }
+        if (results.affectedRows === 0) {
+            return res.status(404).send('Hibás azonosító!');
+        }
+        return res.status(200).send('Sikeres módosítás!');
+    });
+});
 
 
 

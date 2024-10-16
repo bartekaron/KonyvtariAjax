@@ -44,9 +44,12 @@ function onSzerzoLoad(){
                 updateButton.innerText = 'Frissítés';
                 updateButton.classList.add('btn', 'btn-secondary');
                 updateButton.onclick = (event) => {
-                    event.stopPropagation(); 
-                    updateSzerzo(item);
+                    event.stopPropagation();
+                    // Hívjuk meg a frissítést a kiválasztott szerző ID-jével
+                    updateSzerzo(item.id); // Pass the item ID to the updateSzerzo function
+                    render("updateAuthor");
                 };
+                
                 
                 let tdUpdate = document.createElement('td');
                 tdUpdate.appendChild(updateButton);
@@ -123,32 +126,26 @@ function deleteRow(item) {
     
 }
 
-function updateSzerzo(item) {
-       
-        var data = JSON.stringify({
-            name: document.querySelector('name'),
-            birthdate: document.querySelector('birthdate')
-        });
+function updateSzerzo(id) {
+    var data = JSON.stringify({
+        name: document.querySelector('#name').value,
+        birthdate: document.querySelector('#birthdate').value
+    });
 
-        
-        var xhrSzerzoUpdate = new XMLHttpRequest();
-        xhrSzerzoUpdate.open('PATCH', `http://localhost:5000/authors/${item.id}`, true);
-        xhrSzerzoUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    var xhrSzerzoUpdate = new XMLHttpRequest();
+    xhrSzerzoUpdate.open('PATCH', `http://localhost:5000/authors/${id}`, true);
+    xhrSzerzoUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
-        xhrSzerzoUpdate.onreadystatechange = function() {
-            if (xhrSzerzoUpdate.readyState === 4) {
-                if (xhrSzerzoUpdate.status === 200) {
-                    alert('Frissítés sikeres!'); 
-                    
-                   
-                    
-                } else {
-                    alert('Hiba történt: ' + xhrSzerzoUpdate.responseText); 
-                }
+    xhrSzerzoUpdate.onreadystatechange = function() {
+        if (xhrSzerzoUpdate.readyState === 4) {
+            if (xhrSzerzoUpdate.status === 200) {
+                alert('Frissítés sikeres!');
+                onSzerzoLoad(); // Reload author list after updating
+            } else {
+                alert('Hiba történt: ' + xhrSzerzoUpdate.responseText);
             }
-        };
+        }
+    };
 
-        xhrSzerzoUpdate.send(data);
-        onSzerzoLoad();
-    
+    xhrSzerzoUpdate.send(data);
 }

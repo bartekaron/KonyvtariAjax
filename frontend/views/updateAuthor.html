@@ -1,13 +1,13 @@
-<form>
-    <h2 style="text-align: center;" class="mb-3">Szerző módosítás</h1>
+<form onsubmit="szerzoFeltoltes(event)">
+    <h2 style="text-align: center;" class="mb-3">Szerző módosítása</h2>
     <div class="mb-3">
-      <label for="name">Név</label>
-      <input type="name" class="form-control" id="name" placeholder="Adja meg a nevét!">
+        <label for="name">Név</label>
+        <input type="text" class="form-control" id="name" placeholder="Adja meg a nevét!" required>
     </div>
     <div class="mb-3">
-      <label for="birthdate">Születési dátum</label>
-      <input type="date" class="form-control" id="birthdate" placeholder="Adja meg a születési dátumot!">
+        <label for="birthdate">Születési dátum</label>
+        <input type="date" class="form-control" id="birthdate" placeholder="Adja meg a születési dátumot!" required>
     </div>
-    <button type="submit" class="btn btn-primary" onclick="szerzoModositas()">Módosítás</button>
-    <button type="submit" class="btn btn-secondary"><a href="../index.html">Vissza..</a></button>
-  </form>
+    <button type="submit" class="btn btn-primary">Módosítás</button>
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='../../../index.html'">Vissza..</button>
+</form>

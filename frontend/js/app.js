@@ -1,10 +1,8 @@
 
 
-
-
 async function render(view){
     let main = document.querySelector('main')
-    if(view=="addAuthor"){
+    if(view=="addAuthor" || view=="updateAuthor"){
         main.innerHTML = await (await fetch(`${view}.html`)).text()
     }
     else{
