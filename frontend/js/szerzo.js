@@ -1,17 +1,16 @@
 
-var xhr = new XMLHttpRequest();
+var xhrSzerzo = new XMLHttpRequest();
 function onSzerzoLoad(){
-    console.log('xhr request')
-    xhr.open('GET', 'http://localhost:5000/authors', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    xhr.send();
-    xhr.onreadystatechange = function(){
-        if(xhr.readyState == 4){
-            var responseData = JSON.parse(xhr.responseText);
+    xhrSzerzo.open('GET', 'http://localhost:5000/authors', true);
+    xhrSzerzo.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    xhrSzerzo.send();
+    xhrSzerzo.onreadystatechange = function(){
+        if(xhrSzerzo.readyState == 4){
+            var responseData = JSON.parse(xhrSzerzo.responseText);
             console.log(responseData);
             
             // Tábla feltöltés
-            let tbody = document.querySelector('tbody');
+            let tbody = document.querySelector('#authorTbody');
             tbody.innerHTML = '';
             
             
@@ -31,8 +30,6 @@ function onSzerzoLoad(){
                 td2.innerHTML = moment(item.birthdate).format('YYYY-MM-DD');
                
                
-                
-                
 
                 
                 let deleteButton = document.createElement('button');
@@ -76,35 +73,37 @@ function onSzerzoLoad(){
 onSzerzoLoad();
 
 
-function szerzoFeltoltes(){
+function szerzoFeltoltes(event) {
+    event.preventDefault(); // Prevent the default form submission
+
     var data = JSON.stringify({
-        name: document.querySelector('#name').value,  
-        birthdate: document.querySelector('#birthdate').value,        
+        name: document.querySelector('#name').value,
+        birthdate: document.querySelector('#birthdate').value        
     });
 
-    xhr.open('POST', 'http://localhost:5000/author', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            alert(xhr.responseText);  
+    var xhrSzerzo = new XMLHttpRequest();
+    xhrSzerzo.open('POST', 'http://localhost:5000/authors', true);
+    xhrSzerzo.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+    xhrSzerzo.onreadystatechange = function() {
+        if (xhrSzerzo.readyState === 4) {
+            alert(xhrSzerzo.responseText);
+            onSzerzoLoad(); // Reload author list after adding a new author
         }
     };
-    
-    xhr.send(data);
-    onSzerzoLoad();
-    
+
+    xhrSzerzo.send(data);
 }
 
 function deleteRow(item) {
     
-        var xhrDelete = new XMLHttpRequest();
-        xhrDelete.open('DELETE', `http://localhost:5000/author/${item.id}`, true); 
-        xhrDelete.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        var xhrSzerzoDelete = new XMLHttpRequest();
+        xhrSzerzoDelete.open('DELETE', `http://localhost:5000/authors/${item.id}`, true); 
+        xhrSzerzoDelete.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
         
-        xhrDelete.onreadystatechange = function() {
-            if (xhrDelete.readyState === 4) {
-                if (xhrDelete.status === 202) {
+        xhrSzerzoDelete.onreadystatechange = function() {
+            if (xhrSzerzoDelete.readyState === 4) {
+                if (xhrSzerzoDelete.status === 202) {
                     alert('Sikeres törlés!'); 
                    
                     const rows = document.querySelectorAll('.table tbody tr');
@@ -114,12 +113,12 @@ function deleteRow(item) {
                         }
                     });
                 } else {
-                    alert(xhrDelete.responseText);
+                    alert(xhrSzerzoDelete.responseText);
                 }
             }
         };
         
-        xhrDelete.send();
+        xhrSzerzoDelete.send();
         onSzerzoLoad();
     
 }
@@ -132,24 +131,24 @@ function updateSzerzo(item) {
         });
 
         
-        var xhrUpdate = new XMLHttpRequest();
-        xhrUpdate.open('PATCH', `http://localhost:5000/author/${item.id}`, true);
-        xhrUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        var xhrSzerzoUpdate = new XMLHttpRequest();
+        xhrSzerzoUpdate.open('PATCH', `http://localhost:5000/authors/${item.id}`, true);
+        xhrSzerzoUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
-        xhrUpdate.onreadystatechange = function() {
-            if (xhrUpdate.readyState === 4) {
-                if (xhrUpdate.status === 200) {
+        xhrSzerzoUpdate.onreadystatechange = function() {
+            if (xhrSzerzoUpdate.readyState === 4) {
+                if (xhrSzerzoUpdate.status === 200) {
                     alert('Frissítés sikeres!'); 
                     
                    
                     
                 } else {
-                    alert('Hiba történt: ' + xhrUpdate.responseText); 
+                    alert('Hiba történt: ' + xhrSzerzoUpdate.responseText); 
                 }
             }
         };
 
-        xhrUpdate.send(data);
+        xhrSzerzoUpdate.send(data);
         onSzerzoLoad();
     
 }

@@ -1,22 +1,22 @@
-<form>
+<form onsubmit="konyvFeltoltes(event)">
     <h2 style="text-align: center;" class="mb-3">Könyv felvétele</h1>
     <div class="mb-3">
-      <label for="title">Cím</label>
-      <input type="title" class="form-control" id="title" placeholder="Adja meg a címét!">
+        <label for="title">Cím</label>
+        <input type="text" class="form-control" id="title" placeholder="Adja meg a címét!" required>
     </div>
     <div class="mb-3">
-      <label for="releaseDate">Kiadási dátum</label>
-      <input type="date" class="form-control" id="releaseDate" placeholder="Adja meg a kiadási dátumot!">
+        <label for="releaseDate">Kiadási dátum</label>
+        <input type="date" class="form-control" id="releaseDate" placeholder="Adja meg a kiadási dátumot!" required>
     </div>
     <div class="mb-3">
         <label for="isbn">ISBN</label>
-        <input type="title" class="form-control" id="isbn" placeholder="Adja meg az ISBN-t!">
+        <input type="text" class="form-control" id="isbn" placeholder="Adja meg az ISBN-t!" required>
     </div>
     <div class="mb-3">
-        <label for="isbn">Szerző</label>
-        <select class="form-select" id="authorSelect" aria-label="Válassza ki a könyv szerzőjét!">
-        </select>
+      <label for="authorSelect">Szerző</label>
+      <select class="form-select" id="authorSelect" aria-label="Válassza ki a könyv szerzőjét!" required>
+      </select>
     </div>
-    <button type="submit" class="btn btn-primary mb-3" onclick="konyvFeltoltes()">Feltöltés</button>
+    <button type="submit" class="btn btn-primary" onclick="konyvFeltoltes()">Feltöltés</button>
     <button type="submit" class="btn btn-secondary"><a href="index.html">Vissza..</a></button>
   </form>

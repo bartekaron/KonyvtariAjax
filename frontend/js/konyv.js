@@ -1,43 +1,36 @@
 
 var xhr = new XMLHttpRequest();
-function onBookLoad(){
+szamlalo = 0;
+let kivalasztott;
+function onBookLoad() {
     console.log('xhr request')
     xhr.open('GET', 'http://localhost:5000/books', true);
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     xhr.send();
-    xhr.onreadystatechange = function(){
-        if(xhr.readyState == 4){
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
             var responseData = JSON.parse(xhr.responseText);
             console.log(responseData);
             
             // Tábla feltöltés
-            let tbody = document.querySelector('tbody');
+            let tbody = document.querySelector('#konyvTbody');
             tbody.innerHTML = '';
-            
-            
-      
-           // egyseg.innerHTML = '<option selected>Válaszd ki az egységet</option>'; 
 
-            responseData.forEach((item) =>{
+            responseData.forEach((item) => {
                 let tr = document.createElement('tr');
                 let td0 = document.createElement('td')
                 let td1 = document.createElement('td');
                 let td2 = document.createElement('td');
                 let td3 = document.createElement('td');
-                let td4 = document.createElement('td');
-               
+                let td4 = document.createElement('td');  // Szerzők oszlopa
 
-                td0.innerHTML = item.id;
-                td1.innerHTML = item.title;    
-                td2.innerHTML = moment(item.releaseDate).format('YYYY-MM-DD');
-                td3.innerHTML = item.ISBN;
-                td4.innerHTML = item.name;
-               
-               
-                
-                
 
-                
+                td0.innerHTML = item.book_id;   // könyv azonosító
+                td1.innerHTML = item.title;       // könyv címe    
+                td2.innerHTML = moment(item.releaseDate).format('YYYY-MM-DD'); // kiadási dátum
+                td3.innerHTML = item.ISBN;        // ISBN szám
+                td4.innerHTML = item.authors;     // szerzők nevei
+
                 let deleteButton = document.createElement('button');
                 deleteButton.innerText = 'Törlés';
                 deleteButton.classList.add('btn', 'btn-danger');
@@ -51,18 +44,15 @@ function onBookLoad(){
                 updateButton.classList.add('btn', 'btn-secondary');
                 updateButton.onclick = (event) => {
                     event.stopPropagation(); 
-                    updateKonyv(item);
+                    render('updateBook');
                 };
-                
+
                 let tdUpdate = document.createElement('td');
                 tdUpdate.appendChild(updateButton);
-                tdUpdate.classList.add('text-end')
-                
-                
+                tdUpdate.classList.add('text-end');
+
                 let tdDelete = document.createElement('td');
                 tdDelete.appendChild(deleteButton);
-              
-                
 
                 tr.appendChild(td0);
                 tr.appendChild(td1);    
@@ -73,39 +63,65 @@ function onBookLoad(){
                 tr.appendChild(tdDelete);
                 tbody.appendChild(tr);
             });
-            
-          
         }
     }
 }
+
+
 onBookLoad();
+/*
+function konyvFeltoltes(event) {
+    event.preventDefault(); // Megakadályozzuk az alapértelmezett űrlap küldést
 
-
-function konyvFeltoltes(){
     var data = JSON.stringify({
         title: document.querySelector('#title').value,  
         releaseDate: document.querySelector('#releaseDate').value,      
-        ISBN: document.querySelector('#isbn').value,  
+        ISBN: document.querySelector('#isbn').value 
     });
 
     xhr.open('POST', 'http://localhost:5000/books', true);
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    
+
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
-            alert(xhr.responseText);  
+            alert(xhr.responseText);
+            onBookLoad(); // Itt hívod meg újra a könyvek listájának betöltését
         }
     };
-    
+
     xhr.send(data);
-    onBookLoad();
-    
+}*/
+
+
+function konyvFeltoltes(event) {
+    event.preventDefault();
+
+    var data = JSON.stringify({
+        title: document.querySelector('#title').value,
+        releaseDate: document.querySelector('#releaseDate').value,
+        ISBN: document.querySelector('#isbn').value,
+        authorId: document.querySelector('#authorSelect').value // Szerző ID
+    });
+
+    xhr.open('POST', 'http://localhost:5000/books', true);
+    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            alert(xhr.responseText);
+            onBookLoad(); // Itt hívod meg újra a könyvek listájának betöltését
+        }
+    };
+
+    xhr.send(data);
 }
+
+
 
 function deleteRow(item) {
     
         var xhrDelete = new XMLHttpRequest();
-        xhrDelete.open('DELETE', `http://localhost:5000/books/${item.id}`, true); 
+        xhrDelete.open('DELETE', `http://localhost:5000/books/${item.book_id}`, true); 
         xhrDelete.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
         
         xhrDelete.onreadystatechange = function() {
@@ -130,7 +146,7 @@ function deleteRow(item) {
     
 }
 
-function updateKonyv(item) {
+function updateKonyv(kivalasztott) {
        
         var data = JSON.stringify({
             title: document.querySelector('title'),
@@ -141,7 +157,7 @@ function updateKonyv(item) {
 
         
         var xhrUpdate = new XMLHttpRequest();
-        xhrUpdate.open('PATCH', `http://localhost:5000/books/${item.id}`, true);
+        xhrUpdate.open('PATCH', `http://localhost:5000/books/${kivalasztott.book_id}`, true);
         xhrUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
         xhrUpdate.onreadystatechange = function() {
@@ -160,4 +176,34 @@ function updateKonyv(item) {
         xhrUpdate.send(data);
         onBookLoad();
     
+}
+
+function authorToltes() {
+    var xhrAuthor = new XMLHttpRequest();
+    xhrAuthor.open('GET', 'http://localhost:5000/authors', true);
+    xhrAuthor.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    xhrAuthor.send();
+    
+    xhrAuthor.onreadystatechange = function() {
+        if (xhrAuthor.readyState == 4) {
+
+            if (xhrAuthor.status === 200) {
+                var authorData = JSON.parse(xhrAuthor.responseText);
+                
+            
+                if (Array.isArray(authorData)) {
+                    authorData.forEach((item) => {
+                        let option = document.createElement('option');
+                        option.value = item.id;
+                        option.text = item.name;
+                        document.querySelector('#authorSelect').appendChild(option);
+                    });
+                } else {
+                    console.error("Expected authorData to be an array.");
+                }
+            } else {
+                console.error("Error fetching authors:", xhrAuthor.statusText);
+            }
+        }
+    }
 }

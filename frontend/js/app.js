@@ -10,6 +10,16 @@ async function render(view){
     else{
         main.innerHTML = await (await fetch(`views/${view}.html`)).text()
     }
+    switch(view){
+        case 'addBook' : {
+            authorToltes();
+            break;
+        }
+        case 'updateBook' : {
+            authorToltes();
+            break;
+        }
+    } 
     
 }
 

@@ -19,30 +19,62 @@ var pool  = mysql.createPool({
 
 
 app.get('/books', (req, res) => {
-    pool.query(`SELECT * FROM books`, (err, results) => {
-        if(err){
+    const query = `
+        SELECT 
+            b.id AS book_id,
+            b.title AS title,
+            b.releaseDate AS releaseDate,
+            b.ISBN AS ISBN,
+            GROUP_CONCAT(a.name SEPARATOR ', ') AS authors
+        FROM 
+            books b
+        LEFT JOIN 
+            book_authors ba ON b.id = ba.bookID
+        LEFT JOIN 
+            authors a ON ba.authorID = a.id
+        GROUP BY 
+            b.id
+    `;
+
+    pool.query(query, (err, results) => {
+        if (err) {
             res.status(500).send("Hiba történt az adatbázishoz való csatlakozás során!");
             return;
         }
         res.status(200).send(results);
-        return; 
-    })
-});
-
-app.post('/books', (req, res) => {
-    if(!req.body.title) {
-        res.status(400).send("A könyv címe kötelező!");
-        return;
-    }
-    pool.query(`INSERT INTO books VALUES(' ','${req.body.title}', '${req.body.releaseDate}', '${req.body.ISBN}')`, (err, results) => {
-        if(err){
-            res.status(500).send("Hiba történt az adatbázishoz való csatlakozás során!");
-            return;
-        }
-        res.status(202).send("Sikeres regisztráció!")
-        return;
     });
 });
+
+
+app.post('/books', (req, res) => {
+    if (!req.body.title) {
+        return res.status(400).send("A könyv címe kötelező!");
+    }
+
+    // Új könyv hozzáadása
+    pool.query(`INSERT INTO books (title, releaseDate, ISBN) VALUES (?, ?, ?)`, 
+    [req.body.title, req.body.releaseDate, req.body.ISBN], (err, results) => {
+        if (err) {
+            return res.status(500).send("Hiba történt az adatbázishoz való csatlakozás során!");
+        }
+
+        // Könyv ID-jának lekérése
+        const bookId = results.insertId;
+
+        // Szerző hozzárendelése, ha van
+        if (req.body.authorId) {
+            pool.query(`INSERT INTO book_authors (bookID, authorID) VALUES (?, ?)`, 
+            [bookId, req.body.authorId], (err) => {
+                if (err) {
+                    return res.status(500).send("Hiba történt a szerző hozzárendelésekor!");
+                }
+            });
+        }
+
+        return res.status(202).send({ id: bookId, message: "Sikeres regisztráció!" });
+    });
+});
+
 
 app.patch('/books/:id', (req, res) => {
     if(!req.params.id){
@@ -95,6 +127,11 @@ app.delete('/books/:id', (req, res) => {
 });
 
 
+app.post('/books/:book_id/authors/:author_id', async (req, res) => {
+  const { book_id, author_id } = req.params;
+  await pool.query('INSERT INTO book_authors (bookID, authorID) VALUES (?, ?)', [book_id, author_id]);
+  res.status(201).send('Author assigned to book!');
+});
 
 /*
 GET /books - Listázza az összes könyvet.
@@ -119,20 +156,21 @@ app.get('/authors', (req, res) =>{
   })
 })
 //POST /authors - Új szerző hozzáadása.
-app.post('/authors', (req,res)=>{
-  if(!req.body.name || !req.body.birthdate){
-    res.status(203).send('Nem adtál meg minden kötelező adatot')
+app.post('/authors', (req, res) => {
+  if (!req.body.name || !req.body.birthdate) {
+    res.status(203).send('Nem adtál meg minden kötelező adatot');
     return;
   }
-  pool.query(`INSERT INTO authors VALUES('','${req.body.name}', '${req.body.birthdate}')`, (err,results)=>{
-    if(err){
+  pool.query(`INSERT INTO authors VALUES('', '${req.body.name}', '${req.body.birthdate}')`, (err, results) => {
+    if (err) {
       res.status(500).send('Hiba történt az adatbázis művelet közben!');
       return;
-  }
-  res.status(202).send('Sikeres felvétel!');
-  return;
-  })
-})
+    }
+    res.status(202).send('Sikeres felvétel!');
+    return;
+  });
+});
+
 
 //DELETE /authors/{id} - Szerző törlése.*/
 app.delete('/authors/:id', (req, res) =>{
