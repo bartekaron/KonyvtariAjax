@@ -13,3 +13,20 @@ footer{
 h3{
     color: red;
 }
+
+a{
+    text-decoration: none;
+    color: white;
+}
+
+.btn-custom {
+    background-color: #28a745; /* Zöld háttér */
+    color: white; /* Fehér szöveg */
+    border-radius: 5px; /* Lekerekített sarkok */
+    padding: 10px 20px; /* Belső margó */
+    border: none; /* Nincs keret */
+}
+
+.btn-custom:hover {
+    background-color: #218838; /* Sötétebb zöld hover */
+}
