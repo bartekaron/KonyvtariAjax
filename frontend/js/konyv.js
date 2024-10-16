@@ -1,6 +1,8 @@
-function onLoad(){
+
+var xhr = new XMLHttpRequest();
+function onBookLoad(){
     console.log('xhr request')
-    xhr.open('GET', 'http://127.0.0.1:5500/frontend/index.html', true);
+    xhr.open('GET', 'http://localhost:5000/books', true);
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     xhr.send();
     xhr.onreadystatechange = function(){
@@ -11,21 +13,23 @@ function onLoad(){
             // Tábla feltöltés
             let tbody = document.querySelector('tbody');
             tbody.innerHTML = '';
-            let szamlalo = 0;
+            
             
       
-            egyseg.innerHTML = '<option selected>Válaszd ki az egységet</option>'; 
+           // egyseg.innerHTML = '<option selected>Válaszd ki az egységet</option>'; 
 
             responseData.forEach((item) =>{
                 let tr = document.createElement('tr');
+                let td0 = document.createElement('td')
                 let td1 = document.createElement('td');
                 let td2 = document.createElement('td');
                 let td3 = document.createElement('td');
                 let td4 = document.createElement('td');
                
 
+                td0.innerHTML = item.id;
                 td1.innerHTML = item.title;    
-                td2.innerHTML = item.releaseDate;
+                td2.innerHTML = moment(item.releaseDate).format('YYYY-MM-DD');
                 td3.innerHTML = item.ISBN;
                 td4.innerHTML = item.name;
                
@@ -47,11 +51,12 @@ function onLoad(){
                 updateButton.classList.add('btn', 'btn-secondary');
                 updateButton.onclick = (event) => {
                     event.stopPropagation(); 
-                    updateRow(item);
+                    updateKonyv(item);
                 };
                 
                 let tdUpdate = document.createElement('td');
                 tdUpdate.appendChild(updateButton);
+                tdUpdate.classList.add('text-end')
                 
                 
                 let tdDelete = document.createElement('td');
@@ -59,8 +64,8 @@ function onLoad(){
               
                 
 
-       
-                tr.appendChild(td1);
+                tr.appendChild(td0);
+                tr.appendChild(td1);    
                 tr.appendChild(td2);
                 tr.appendChild(td3);
                 tr.appendChild(td4);
@@ -73,7 +78,7 @@ function onLoad(){
         }
     }
 }
-onLoad();
+onBookLoad();
 
 
 function konyvFeltoltes(){
@@ -83,7 +88,7 @@ function konyvFeltoltes(){
         ISBN: document.querySelector('#isbn').value,  
     });
 
-    xhr.open('POST', 'http://127.0.0.1:5500/frontend/index.html', true);
+    xhr.open('POST', 'http://localhost:5000/books', true);
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     
     xhr.onreadystatechange = function() {
@@ -93,14 +98,14 @@ function konyvFeltoltes(){
     };
     
     xhr.send(data);
-    onLoad();
+    onBookLoad();
     
 }
 
 function deleteRow(item) {
     
         var xhrDelete = new XMLHttpRequest();
-        xhrDelete.open('DELETE', `http://127.0.0.1:5500/frontend/index.html/${item.id}`, true); 
+        xhrDelete.open('DELETE', `http://localhost:5000/books/${item.id}`, true); 
         xhrDelete.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
         
         xhrDelete.onreadystatechange = function() {
@@ -121,7 +126,7 @@ function deleteRow(item) {
         };
         
         xhrDelete.send();
-        onLoad();
+        onBookLoad();
     
 }
 
@@ -136,7 +141,7 @@ function updateKonyv(item) {
 
         
         var xhrUpdate = new XMLHttpRequest();
-        xhrUpdate.open('PATCH', `http://127.0.0.1:5500/frontend/index.html/${item.id}`, true);
+        xhrUpdate.open('PATCH', `http://localhost:5000/books/${item.id}`, true);
         xhrUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
         xhrUpdate.onreadystatechange = function() {
@@ -153,6 +158,6 @@ function updateKonyv(item) {
         };
 
         xhrUpdate.send(data);
-        onLoad();
+        onBookLoad();
     
 }

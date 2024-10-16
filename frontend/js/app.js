@@ -1,6 +1,6 @@
-const { title } = require("process");
 
-var xhr = new XMLHttpRequest();
+
+
 
 async function render(view){
     let main = document.querySelector('main')
