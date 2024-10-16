@@ -92,12 +92,16 @@ app.delete('/books/:id', (req, res) => {
 
 });
 
+
+
 /*
 GET /books - Listázza az összes könyvet.
 POST /books - Új könyv hozzáadása.
 PUT /books/{id} - Meglévő könyv módosítása.
 DELETE /books/{id} - Könyv törlése.
 */
+
+//POST /books/{book_id}/authors/{author_id} - Egy szerzőt hozzárendel egy könyvhöz.
 
 //A szerzőkhez tartozó végpontok:
 
