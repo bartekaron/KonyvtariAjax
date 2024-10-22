@@ -1,7 +1,9 @@
 
 var xhr = new XMLHttpRequest();
 szamlalo = 0;
-let kivalasztott;
+let titleA;
+let releaseDateA;
+let ISBNA;
 function onBookLoad() {
     console.log('xhr request')
     xhr.open('GET', 'http://localhost:5000/books', true);
@@ -38,7 +40,6 @@ function onBookLoad() {
                     event.stopPropagation(); 
                     deleteRow(item);
                 };
-
                 let updateButton = document.createElement('button');
                 updateButton.innerText = 'Frissítés';
                 updateButton.classList.add('btn', 'btn-secondary');
@@ -47,8 +48,13 @@ function onBookLoad() {
                     // Store the book data in local storage
                     localStorage.setItem('selectedBook', JSON.stringify(item));
                     // Redirect to updateBook.html
-                    render('updateBook');
+                    render('updateBook'); // Or window.location.href = "updateBook.html";
+                    titleA = item.title;
+                    releaseDateA = moment(item.releaseDate).format('YYYY-MM-DD');
+                    ISBNA = item.ISBN;
+                    
                 };
+
                 
 
                 let tdUpdate = document.createElement('td');
@@ -93,30 +99,11 @@ function loadBook(id) {
         }
     };
 }
-
-
-/*
-function konyvFeltoltes(event) {
-    event.preventDefault(); // Megakadályozzuk az alapértelmezett űrlap küldést
-
-    var data = JSON.stringify({
-        title: document.querySelector('#title').value,  
-        releaseDate: document.querySelector('#releaseDate').value,      
-        ISBN: document.querySelector('#isbn').value 
-    });
-
-    xhr.open('POST', 'http://localhost:5000/books', true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            alert(xhr.responseText);
-            onBookLoad(); // Itt hívod meg újra a könyvek listájának betöltését
-        }
-    };
-
-    xhr.send(data);
-}*/
+function ModositInicializalas(){
+    document.querySelector('#titleB').value = titleA;
+    document.querySelector('#releaseDateB').value = releaseDateA;
+    document.querySelector('#isbnB').value = ISBNA;
+};
 
 
 function konyvFeltoltes(event) {
@@ -135,6 +122,7 @@ function konyvFeltoltes(event) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             alert(xhr.responseText);
+            window.location.href = 'index.html';
             onBookLoad(); // Itt hívod meg újra a könyvek listájának betöltését
         }
     };
@@ -172,23 +160,26 @@ function deleteRow(item) {
     
 }
 
-function updateKonyv(kivalasztott) {
+function updateKonyv(id) {
+    
+    
+
     var data = JSON.stringify({
-        title: document.querySelector('#title').value,          // Get input values
-        releaseDate: document.querySelector('#releaseDate').value,
-        ISBN: document.querySelector('#isbn').value,
-        authorId: document.querySelector('#authorSelect').value // Get selected author ID
+        title: document.querySelector('#titleB').value,
+        releaseDate: document.querySelector('#releaseDateB').value,
+        ISBN: document.querySelector('#isbnB').value
+        
     });
 
     var xhrUpdate = new XMLHttpRequest();
-    xhrUpdate.open('PATCH', `http://localhost:5000/books/${kivalasztott.book_id}`, true);
+    xhrUpdate.open('PATCH', `http://localhost:5000/books/${id}`, true);
     xhrUpdate.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 
     xhrUpdate.onreadystatechange = function() {
         if (xhrUpdate.readyState === 4) {
             if (xhrUpdate.status === 200) {
                 alert('Frissítés sikeres!');
-                onBookLoad(); // Refresh book list
+                window.location.href = 'index.html'; // Redirect to the main page after update
             } else {
                 alert('Hiba történt: ' + xhrUpdate.responseText);
             }
@@ -230,21 +221,8 @@ function authorToltes() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Get the selectedBook from local storage
-    const selectedBook = JSON.parse(localStorage.getItem('selectedBook'));
 
-    // Check if there is a selectedBook
-    if (selectedBook) {
-        document.querySelector('#title').value = selectedBook.title;
-        document.querySelector('#releaseDate').value = selectedBook.releaseDate;
-        document.querySelector('#isbn').value = selectedBook.ISBN;
 
-        // Populate the author select options
-        // You might want to fetch authors here and select the one associated with the book
-        fetchAuthorsAndSelect(selectedBook.authorId);
-    }
-});
 
 function fetchAuthorsAndSelect(selectedAuthorId) {
     var xhrAuthor = new XMLHttpRequest();

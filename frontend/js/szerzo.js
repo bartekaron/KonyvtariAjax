@@ -71,6 +71,7 @@ function szerzoFeltoltes(event) {
     xhrSzerzo.onreadystatechange = function() {
         if (xhrSzerzo.readyState === 4) {
             alert(xhrSzerzo.responseText);
+            window.location.href = 'authors.html';
             onSzerzoLoad(); 
         }
     };

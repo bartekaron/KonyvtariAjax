@@ -71,7 +71,7 @@ app.post('/books', (req, res) => {
             });
         }
 
-        return res.status(202).send({ id: bookId, message: "Sikeres regisztráció!" });
+        return res.status(202).send({ id: bookId, message: "Sikeres felvétel!" });
     });
 });
 
@@ -102,7 +102,7 @@ app.patch('/books/:id', (req, res) => {
             return;
         }
 
-        // Update the book_authors table
+       /* // Update the book_authors table
         if (authorId) {
             pool.query(`DELETE FROM book_authors WHERE bookID=?`, [req.params.id], (err) => {
                 if (err) {
@@ -117,7 +117,7 @@ app.patch('/books/:id', (req, res) => {
                 });
             });
         }
-
+        */
         res.status(200).send('Sikeres módosítás!');
         return;
     });

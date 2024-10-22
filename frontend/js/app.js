@@ -14,7 +14,7 @@ async function render(view){
             break;
         }
         case 'updateBook' : {
-            authorToltes();
+            ModositInicializalas();
             break;
         }
     } 
